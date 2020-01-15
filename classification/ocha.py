@@ -38,20 +38,16 @@ class TextClassification:
         # Get the prediction and probabilities
         # vectorize the data
         vectorized_data = ett_t.perform_model_transformation(self.models["vector_model"], transformed_data)
-        #vectorized_data = ett_t.perform_model_transformation(self.models[0], transformed_data)
+
         # Normalize teh data
         normalized_data = ett_t.perform_model_transformation(self.models["normalizar_model"], vectorized_data)
-        #normalized_data = ett_t.perform_model_transformation(self.models[1], vectorized_data)
-        normalized_data = pd.DataFrame(normalized_data)
-        print("normalized_data", normalized_data)
+
         # Get the predciton labels
-        labelled_data = ett_p.perform_model_predictions(self.models["prediction_model"], vectorized_data)
-        #labelled_data = ett_p.perform_model_predictions(self.models[2], vectorized_data)
-        print("labelled_data", labelled_data)
+        labelled_data = ett_p.perform_model_predictions(self.models["prediction_model"], normalized_data)
+
         # Get the probabilities dataframe
-        probabilities_data = ett_p.perform_model_prob_predictions(self.models["prediction_model"], vectorized_data)
-        #probabilities_data = ett_p.perform_model_prob_predictions(self.models[2], vectorized_data)
-        print("probabilities_data",probabilities_data)
+        probabilities_data = ett_p.perform_model_prob_predictions(self.models["prediction_model"], normalized_data)
+  
         return jsonify({"message": "successfully running"})
 
     def pre_process_text_cleanse(self, initial_data):
@@ -64,11 +60,11 @@ class TextClassification:
         # Remove English stop words
         rew_cleaned_data = ett_c.remove_language_stopwords(l_cleaned_data, Language.ENGLISH.name)
         # Remove HTML element
-        #rew_cleaned_data =rew_cleaned_data.apply(lambda x: re.sub('<[^>]+>', "",x))
+        rew_cleaned_data =rew_cleaned_data.apply(lambda x: re.sub('<[^>]+>', "",x))
         # Remove Special Character
-        #rew_cleaned_data = rew_cleaned_data.apply(lambda k: re.sub(r"[^a-zA-Z0-9]+", ' ', k))
+        rew_cleaned_data = rew_cleaned_data.apply(lambda k: re.sub(r"[^a-zA-Z0-9]+", ' ', k))
         # Remove Number 
-        #rew_cleaned_data = rew_cleaned_data.apply(lambda c: re.sub(" \d+", " ", c))
+        rew_cleaned_data = rew_cleaned_data.apply(lambda c: re.sub(" \d+", " ", c))
         # Return the newly cleaned data
         return rew_cleaned_data 
 
