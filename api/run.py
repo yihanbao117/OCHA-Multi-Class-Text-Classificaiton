@@ -19,7 +19,6 @@ from flask import flash, redirect
 from pyxlsb import open_workbook
 db_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),'ett')
 sys.path.append(db_folder)
-#print(db_folder)
 
 # The main entry point for the application
 
