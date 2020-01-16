@@ -6,6 +6,7 @@ import json
 import sys
 import os
 import ast
+from ast import literal_eval
 
 from flask_restful import Resource  # Flask restful for create endpoints
 from flask import request, jsonify
@@ -64,9 +65,11 @@ class UploadCategory(Resource):
         bytes_data = request.stream.read()
         str_data = bytes_data.decode("utf-8")
         dic_data = ast.literal_eval(str_data)
+        global input_data
         input_data = pd.DataFrame.from_dict(dic_data) # change dictionary to dataframe
         UploadCategory.data_df = ett_t.transform_data_to_dataframe_basic(input_data, colnames)
-        #print(type(UploadCategory.data_df))
+    
+        #return results
         return jsonify({'message' : dic_data})
         #return "uploading successfully"
 
@@ -77,7 +80,13 @@ class PredictCategory(Resource):
         
         classification = tc(models_object,UploadCategory.data_df)
         result_df = classification.process_data()
-        print(type(result_df))
-        return jsonify({"prediction":"here"})
+        print("yihan",type(result_df))
+        result_df.reset_index(drop=True, inplace=True)
+        input_data.reset_index(drop=True, inplace=True)
+        result_final = pd.concat([input_data, result_df], axis=1)
+        print(result_final)
+        result_str = ett_t.df_to_json(result_final,'index')
+        result_json = literal_eval(result_str)
+        return result_json
   
         
