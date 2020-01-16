@@ -56,7 +56,7 @@ class TextClassification:
         # A list of dataframe that containes all columns you want to show in UI
         result_list = [result_label,result_prob['max_value']]
         results = ett_t.combine_dataframe(result_list,1)
-        results.columns = ['label', 'proba']
+        results.columns = ['code', 'proba']
         return results
 
     def pre_process_text_cleanse(self, initial_data):

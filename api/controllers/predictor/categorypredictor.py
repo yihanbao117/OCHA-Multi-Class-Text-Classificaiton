@@ -20,7 +20,10 @@ from ocha import TextClassification as tc
 base_folder_location = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))),"category")
 
 colnames = ['title', 'text']
-
+label_dict = {6863: "Human Resources", 6864:"Administration/Finance", 6865:"Advocacy/Communications", 
+          6866:"Information and Communications Technology", 6867: "Program/Project Management", 
+          6868:"Monitoring and Evaluation", 20966:"Donor Relations/Grants Management", 
+          20971:"Information Management", 36601:"Logistics/Procurement"}
 # Folder name
 vector_models_folder = "vector_models"
 normalizar_models_folder = "normalizar_models"
@@ -84,6 +87,7 @@ class PredictCategory(Resource):
         result_df.reset_index(drop=True, inplace=True)
         input_data.reset_index(drop=True, inplace=True)
         result_final = pd.concat([input_data, result_df], axis=1)
+        result_final['label'] = result_final['code'].map(label_dict)     
         print(result_final)
         result_str = ett_t.df_to_json(result_final,'index')
         result_json = literal_eval(result_str)
