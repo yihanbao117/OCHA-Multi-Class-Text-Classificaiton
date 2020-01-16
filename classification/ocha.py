@@ -1,26 +1,25 @@
-import pandas as pd
-from flask import jsonify
-from cleanser import Cleanser as ett_c  # ETT Cleanser methods
-from predictor import Predictor as ett_p  # ETT Predictor methods
-from transformer import Transformer as ett_t  # ETT Transformer methods
 import re  # Package used to as replace function
 import numpy as np  # Mathematic caculations
 import pandas as pd  # Dataframe operations
+from flask import jsonify # flask package
+from cleanser import Cleanser as ett_c  # ETT Cleanser methods
+from predictor import Predictor as ett_p  # ETT Predictor methods
+from transformer import Transformer as ett_t  # ETT Transformer methods
 from constants import RegexFilter  # ETT constants methods for RegexFilter
 from constants import Language  # ETT constants methods for language type
 from enum import Enum  # Custom enum for classification type
 
-
 class TextClassification:
+
 
     models = []
     data = pd.DataFrame()
-    output_dataFrame = pd.DataFrame()  # dataframe
+    #output_dataFrame = pd.DataFrame()  # dataframe
 
     def __init__(self, models, data):
         self.models = models
         self.data = data
-        
+
     # Entry point method to actually start the
     # classification operations
     def process(self):
@@ -34,21 +33,28 @@ class TextClassification:
 
         # Transform the data
         transformed_data = self.pre_process_text_transform(cleansed_data)
-        
-        # Get the prediction and probabilities
+    
         # vectorize the data
         vectorized_data = ett_t.perform_model_transformation(self.models["vector_model"], transformed_data)
 
         # Normalize teh data
         normalized_data = ett_t.perform_model_transformation(self.models["normalizar_model"], vectorized_data)
-
+        
         # Get the predciton labels
         labelled_data = ett_p.perform_model_predictions(self.models["prediction_model"], normalized_data)
-
+        result_label = pd.DataFrame(labelled_data)
+   
         # Get the probabilities dataframe
         probabilities_data = ett_p.perform_model_prob_predictions(self.models["prediction_model"], normalized_data)
-  
-        return jsonify({"message": "successfully running"})
+        result_prob = pd.DataFrame(probabilities_data)
+        
+        # get the probability of prediction
+        result_prob['max_value'] = result_prob.max(axis=1)
+        # A list of dataframe that containes all columns you want to show in UI
+        result_list = [result_label,result_prob['max_value']]
+        results = ett_t.combine_dataframe(result_list,1)
+        results.columns = ['label', 'proba']
+        return results
 
     def pre_process_text_cleanse(self, initial_data):
         # Removed all non alphanumeric characters

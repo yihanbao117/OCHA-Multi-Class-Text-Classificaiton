@@ -2,3 +2,7 @@ upload
 category/models
 category/normalizar_models
 category/vector_models
+classification/__pycache__/ocha.cpython-37.pyc
+controllers/predictor/__pycache__/categorypredictor.cpython-37.pyc
+../classification/__pycache__/ocha.cpython-37.pyc
+api/controllers/predictor/__pycache__/categorypredictor.cpython-37.pyc
