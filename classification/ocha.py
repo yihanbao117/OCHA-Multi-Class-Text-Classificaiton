@@ -1,3 +1,6 @@
+#!/usr/bin/env python3 
+# -*- coding: utf-8 -*- 
+
 import re  # Package used to as replace function
 import numpy as np  # Mathematic caculations
 import pandas as pd  # Dataframe operations

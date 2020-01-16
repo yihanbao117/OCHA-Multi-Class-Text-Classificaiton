@@ -1,20 +1,14 @@
 #!/usr/bin/env python3 
 # -*- coding: utf-8 -*- 
 
-"""     
-This script is the entry point of running the OCHA Text Classification web application.
-""" 
-
+import os
+import pandas as pd
+import sys
+import json
 from flask import Flask
 from flask_restful import Api
 from flask import jsonify
 from flask import request
-import os
-from flask import Flask, request, jsonify
-import pandas as pd
-import sys
-import pandas as pd
-import json
 from flask import flash, redirect
 from pyxlsb import open_workbook
 db_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),'ett')
