@@ -22,17 +22,13 @@ sys.path.append(db_folder)
 
 # The main entry point for the application
 
-UPLODA_FOLDER = '/Users/yihanbao/Desktop/OCHA_DATA_ALL/Preprocessed_Data/OCHA-API/OCHA-Multi-Class-Text-Classificaiton/upload'
-ALLOWED_EXTENSIONS = set(['csv', 'xlsx'])
-
 app = Flask(__name__)
 app.secret_key = "acbdefg"
-app.config['UPLOAD_FLODER'] = UPLODA_FOLDER
 api = Api(app)
 
 @app.route('/', methods=['GET'])
 def index():
-    return jsonify({'message' : 'UNISDR FLASK API started'})
+    return jsonify({'message' : 'OCHA FLASK API started'})
 
 from controllers.predictor import categorypredictor
 #from controllers.predictor import themepredictor
