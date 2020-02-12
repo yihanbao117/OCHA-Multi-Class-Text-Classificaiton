@@ -11,46 +11,38 @@ from transformer import Transformer as ett_t  # ETT Transformer methods
 from constants import RegexFilter  # ETT constants methods for RegexFilter
 from constants import Language  # ETT constants methods for language type
 from enum import Enum  # Custom enum for classification type
+from textblob import Word  # Package used to do lemmatization
+from nltk.corpus import stopwords # Corpus for English stopwords
 
 class TextClassification:
 
 
     models = []
     data = pd.DataFrame()
-    #output_dataFrame = pd.DataFrame()  # dataframe
 
     def __init__(self, models, data):
         self.models = models
         self.data = data
 
-    # Entry point method to actually start the
-    # classification operations
+    # Entry point method to actually start the classification operations
     def process(self):
         self.process_data()
 
     # Method which acts as the builder
     def process_data(self):
         
-        # Clean the data
-        cleansed_data = self.pre_process_text_cleanse(self.data)
-
-        # Transform the data
-        transformed_data = self.pre_process_text_transform(cleansed_data)
-    
+        # Clean and transform the text data
+        cleansed_data = self.pre_process_text_cleanse_transform(self.data)
         # vectorize the data
-        vectorized_data = ett_t.perform_model_transformation(self.models["vector_model"], transformed_data)
-
+        vectorized_data = ett_t.perform_model_transformation(self.models["vector_model"], cleansed_data)
         # Normalize teh data
         normalized_data = ett_t.perform_model_transformation(self.models["normalizar_model"], vectorized_data)
-        
         # Get the predciton labels
         labelled_data = ett_p.perform_model_predictions(self.models["prediction_model"], normalized_data)
         result_label = pd.DataFrame(labelled_data)
-   
         # Get the probabilities dataframe
         probabilities_data = ett_p.perform_model_prob_predictions(self.models["prediction_model"], normalized_data)
         result_prob = pd.DataFrame(probabilities_data)
-        
         # get the probability of prediction
         result_prob['max_value'] = result_prob.max(axis=1)
         # A list of dataframe that containes all columns you want to show in UI
@@ -59,32 +51,19 @@ class TextClassification:
         results.columns = ['code', 'proba']
         return results
 
-    def pre_process_text_cleanse(self, initial_data):
-        # Removed all non alphanumeric characters
-        nan_cleaned_data = ett_c.clean_dataframe_by_regex(initial_data, RegexFilter.NON_ALPHA_NUMERIC.value) 
-        # Removed all digits
-        d_cleaned_data = ett_c.clean_dataframe_by_regex(nan_cleaned_data, RegexFilter.DIGITS_ONLY.value) 
-        # Remove non-English text
-        l_cleaned_data = ett_c.remove_non_iso_words(d_cleaned_data, Language.ENGLISH.value)  
-        # Remove English stop words
-        rew_cleaned_data = ett_c.remove_language_stopwords(l_cleaned_data, Language.ENGLISH.name)
+    def pre_process_text_cleanse_transform(self, initial_data):
         # Remove HTML element
-        rew_cleaned_data =rew_cleaned_data.apply(lambda x: re.sub('<[^>]+>', "",x))
+        rew_cleaned_data =initial_data.apply(lambda x: re.sub('<[^>]+>', "",x))
         # Remove Special Character
         rew_cleaned_data = rew_cleaned_data.apply(lambda k: re.sub(r"[^a-zA-Z0-9]+", ' ', k))
-        # Remove Number 
+        # Removed all digits
         rew_cleaned_data = rew_cleaned_data.apply(lambda c: re.sub(" \d+", " ", c))
+        # Lowercase the words
+        rew_cleaned_data = rew_cleaned_data.apply(lambda x: " ".join(x.lower() for x in x.split()))
+        # Text Normalization lemmatization
+        rew_cleaned_data = rew_cleaned_data.apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+        # Remove English stop words
+        stops = set(stopwords.words("english"))
+        rew_cleaned_data = rew_cleaned_data.apply(lambda x: " ".join(x for x in x.split() if x not in stops))
         # Return the newly cleaned data
         return rew_cleaned_data 
-
-    ##
-    # Method used to contain the various transformation procedures performed on the data
-    # @param cleaned_data DataFrame of the cleansed data
-    # @returns DataFrame of the transformed data according to these rules
-    def pre_process_text_transform(self, cleaned_data):
-        # Transform text to lowercase
-        l_transformed_data = ett_t.lowercase(cleaned_data)
-        # Transform text to core words i.e. playing > play
-        le_transformed_data = ett_t.lemmatization_mp(l_transformed_data)
-        # Return the newly transformed data
-        return le_transformed_data

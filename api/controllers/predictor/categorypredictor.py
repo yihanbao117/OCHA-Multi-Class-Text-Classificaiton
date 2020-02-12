@@ -64,16 +64,19 @@ class UploadCategory(Resource):
         data_df = ''
 
     def post(self):
-
-        bytes_data = request.stream.read()
-        str_data = bytes_data.decode("utf-8")
-        dic_data = ast.literal_eval(str_data)
+        # commend the code use for 
+        #bytes_data = request.stream.read()
+        #str_data = bytes_data.decode("utf-8")
+        #dic_data = ast.literal_eval(str_data)
+        job_title = request.args.get("job_title")
+        job_description = request.args.get("job_description")
         global input_data
-        input_data = pd.DataFrame.from_dict(dic_data) # change dictionary to dataframe
+        input_data = pd.DataFrame()
+        input_data['title'] = [job_title]
+        input_data['text'] = [job_description]
         UploadCategory.data_df = ett_t.transform_data_to_dataframe_basic(input_data, colnames)
-    
         #return results
-        return jsonify({'message' : dic_data})
+        return {"title": job_title, "text": job_description}
         #return "uploading successfully"
 
 class PredictCategory(Resource):
